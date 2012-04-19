@@ -40,12 +40,57 @@ class Gantt_helper {
     
 	/**
 	 * Constructor
-	 */
+	 * @author Jesse Bunch
+	*/
 	public function __construct() {
 		$this->EE =& get_instance();
 	}
-	
-	// ----------------------------------------------------------------
+
+	/**
+	 * Calculates an event's running time as a
+	 * percentage of one day
+	 * @author Jesse Bunch
+	*/
+	public function percentage_of_single_day() {
+		
+		// Fetch times, in format %Y-%m-%d %g:%i %a
+		$start_time = $this->EE->TMPL->fetch_param('start_time');
+		$end_time = $this->EE->TMPL->fetch_param('end_time');
+		$date_format = $this->EE->TMPL->fetch_param('format');
+
+		// Parse Dates
+		$start_date = DateTime::createFromFormat($date_format, $start_time);
+		$end_date = DateTime::createFromFormat($date_format, $end_time);
+
+		// If the days are the same, but the end hour is less
+		// than the start hour, increment the end date. This deals
+		// with a bug in the calendar module
+		if (($start_date->format('d') == $end_date->format('d'))
+			&& $end_date->format('G') < $start_date->format('G')) {
+			$end_date->add(new DateInterval('P1D'));
+		}
+		
+		// Get the number of seconds since 12am
+		$start_seconds = ($start_date->format('h') * 3600) 
+							+ ($start_date->format('i') * 60) 
+							+ $start_date->format('s');
+
+		// Running time in seconds
+		$running_seconds = $end_date->getTimestamp() - $start_date->getTimestamp();
+
+		// Calculate percentages
+		$start_time_percentage = ceil($start_seconds / 86400 * 100);
+		$running_time_percentage = ceil($running_seconds / 86400 * 100);
+
+		// Vars
+		return $this->EE->TMPL->parse_variables($this->EE->TMPL->tagdata, array(
+			array(
+				'start_time_percentage' => $start_time_percentage,
+				'running_time_percentage' => $running_time_percentage,
+			)
+		));
+
+	}
 	
 	/**
 	 * Plugin Usage
