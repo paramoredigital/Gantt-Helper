@@ -71,7 +71,7 @@ class Gantt_helper {
 		}
 		
 		// Get the number of seconds since 12am
-		$start_seconds = ($start_date->format('h') * 3600) 
+		$start_seconds = ($start_date->format('H') * 3600) 
 							+ ($start_date->format('i') * 60) 
 							+ $start_date->format('s');
 
