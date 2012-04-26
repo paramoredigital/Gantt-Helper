@@ -91,6 +91,21 @@ class Gantt_helper {
 		));
 
 	}
+
+	/**
+	 * Helper function that basically wraps PHP's strtotime function
+	 * @author Jesse Bunch
+	*/
+	public function string_to_time() {
+
+		$time_string = $this->EE->TMPL->fetch_param('string');
+		$format = $this->EE->TMPL->fetch_param('format');
+
+		$new_date = strtotime($time_string);
+
+		return $this->EE->localize->decode_date($format, $new_date);
+
+	}
 	
 	/**
 	 * Plugin Usage
