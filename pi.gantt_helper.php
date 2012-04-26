@@ -100,8 +100,15 @@ class Gantt_helper {
 
 		$time_string = $this->EE->TMPL->fetch_param('string');
 		$format = $this->EE->TMPL->fetch_param('format');
+		$relative_date = $this->EE->TMPL->fetch_param('relative_date');
 
-		$new_date = strtotime($time_string);
+		if (!$relative_date) {
+			$relative_date = time();
+		} else {
+			$relative_date = strtotime($relative_date);
+		}
+
+		$new_date = strtotime($time_string, $relative_date);
 
 		return $this->EE->localize->decode_date($format, $new_date);
 
