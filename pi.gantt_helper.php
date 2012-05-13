@@ -78,9 +78,20 @@ class Gantt_helper {
 		// Running time in seconds
 		$running_seconds = $end_date->getTimestamp() - $start_date->getTimestamp();
 
-		// Calculate percentages
-		$start_time_percentage = ceil($start_seconds / 86400 * 100);
-		$running_time_percentage = ceil($running_seconds / 86400 * 100);
+		// Calculate Percentages
+		if ($running_seconds == 0) {
+
+			// "All Day" Event
+			$start_time_percentage = 0;
+			$running_time_percentage = 100;
+
+		} else {
+			
+			// Intraday Event
+			$start_time_percentage = ceil($start_seconds / 86400 * 100);
+			$running_time_percentage = ceil($running_seconds / 86400 * 100);
+
+		}
 
 		// Vars
 		return $this->EE->TMPL->parse_variables($this->EE->TMPL->tagdata, array(
