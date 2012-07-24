@@ -57,6 +57,7 @@ class Gantt_helper {
 		$start_time = $this->EE->TMPL->fetch_param('start_time');
 		$end_time = $this->EE->TMPL->fetch_param('end_time');
 		$date_format = $this->EE->TMPL->fetch_param('format');
+		$total_pixels = $this->EE->TMPL->fetch_param('total_pixels');
 
 		// Parse Dates
 		$start_date = DateTime::createFromFormat($date_format, $start_time);
@@ -69,35 +70,49 @@ class Gantt_helper {
 			&& $end_date->format('G') < $start_date->format('G')) {
 			$end_date->add(new DateInterval('P1D'));
 		}
-		
-		// Get the number of seconds since 12am
-		$start_seconds = ($start_date->format('H') * 3600) 
-							+ ($start_date->format('i') * 60) 
-							+ $start_date->format('s');
+
+		// Some counters
+		$day_start_hour = 7; // Day starts at xAM
+		$hours_per_day = 24 - $day_start_hour + 1; // We include 12am here
+
+		// Start and end hours
+		$start_hour = $start_date->format('H') - $day_start_hour;
+		$end_hour = $end_date->format('H') - $day_start_hour;
+
+		// Add half hours
+		$start_hour += ($start_date->format('i') < 30) ? 0 : 0.5;
+		$end_hour += ($end_date->format('i') < 30) ? 0 : 0.5;
+
+		// Account for 12am the next day
+		if ($end_date->format('H') == 0) {
+			$end_hour = $hours_per_day;
+		}
 
 		// Running time in seconds
 		$running_seconds = $end_date->getTimestamp() - $start_date->getTimestamp();
 
-		// Calculate Percentages
+		// Calculate Ratios
 		if ($running_seconds == 0) {
 
 			// "All Day" Event
-			$start_time_percentage = 0;
-			$running_time_percentage = 100;
+			$start_time_ratio = 0;
+			$running_time_ratio = 100;
 
 		} else {
 			
 			// Intraday Event
-			$start_time_percentage = ceil($start_seconds / 86400 * 100);
-			$running_time_percentage = ceil($running_seconds / 86400 * 100);
+			$start_time_ratio = $start_hour / $hours_per_day;
+			$running_time_ratio = ($end_hour - $start_hour) / $hours_per_day;
 
 		}
 
 		// Vars
 		return $this->EE->TMPL->parse_variables($this->EE->TMPL->tagdata, array(
 			array(
-				'start_time_percentage' => $start_time_percentage,
-				'running_time_percentage' => $running_time_percentage,
+				'start_time_percentage' => floor($start_time_ratio * 100),
+				'running_time_percentage' => ceil($running_time_ratio * 100),
+				'start_time_pixels' => floor($start_time_ratio * $total_pixels),
+				'running_time_pixels' => ceil($running_time_ratio * $total_pixels),
 			)
 		));
 
