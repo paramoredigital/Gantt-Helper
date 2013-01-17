@@ -84,7 +84,17 @@ class Gantt_helper {
 		$end_hour += ($end_date->format('i') < 30) ? 0 : 0.5;
 
 		// Account for 12am the next day
-		if ($end_date->format('H') == 0) {
+		if ($end_date->format('H') == 0 && $end_date->format('i') <= 30) {
+			$end_hour = $hours_per_day - 1;
+		}
+
+		// Account for 12:30am the next day
+		if ($end_date->format('H') == 0 && $end_date->format('i') >= 30) {
+			$end_hour = $hours_per_day - 0.5;
+		}
+
+		// Account for 1am the next day
+		if ($end_date->format('H') == 1) {
 			$end_hour = $hours_per_day;
 		}
 
